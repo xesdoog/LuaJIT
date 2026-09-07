@@ -31,7 +31,6 @@
 #include "lj_vmevent.h"
 #include "lj_target.h"
 #include "lj_prng.h"
-#include "lj_fopen.h"
 
 /* -- Error handling ------------------------------------------------------ */
 
@@ -112,7 +111,7 @@ static void perftools_addtrace(GCtrace *T)
   if (!fp) {
     char fname[40];
     sprintf(fname, "/tmp/perf-%d.map", getpid());
-    if (!(fp = _lua_fopen(fname, "w"))) return;
+    if (!(fp = fopen(fname, "w"))) return;
     setlinebuf(fp);
   }
   fprintf(fp, "%lx %x TRACE_%d::%s:%u\n",
@@ -657,7 +656,7 @@ static int trace_abort(jit_State *J)
   } else if (e == LJ_TRERR_MCODEAL) {
     if (!J->mcarea) {  /* Disable JIT compiler if first mcode alloc fails. */
       J->flags &= ~JIT_F_ON;
-      lj_dispatch_update(J2G(J));
+      lj_dispatch_update(J2G(J), 0);
     }
     lj_trace_flushall(L);
   }
@@ -688,7 +687,7 @@ static TValue *trace_state(lua_State *L, lua_CFunction dummy, void *ud)
     case LJ_TRACE_START:
       J->state = LJ_TRACE_RECORD;  /* trace_start() may change state. */
       trace_start(J);
-      lj_dispatch_update(J2G(J));
+      lj_dispatch_update(J2G(J), 0);
       if (J->state != LJ_TRACE_RECORD_1ST)
 	break;
       /* fallthrough */
@@ -746,7 +745,7 @@ static TValue *trace_state(lua_State *L, lua_CFunction dummy, void *ud)
       trace_stop(J);
       setvmstate(J2G(J), INTERP);
       J->state = LJ_TRACE_IDLE;
-      lj_dispatch_update(J2G(J));
+      lj_dispatch_update(J2G(J), 0);
       return NULL;
 
     default:  /* Trace aborted asynchronously. */
@@ -758,7 +757,7 @@ static TValue *trace_state(lua_State *L, lua_CFunction dummy, void *ud)
 	goto retry;
       setvmstate(J2G(J), INTERP);
       J->state = LJ_TRACE_IDLE;
-      lj_dispatch_update(J2G(J));
+      lj_dispatch_update(J2G(J), 0);
       return NULL;
     }
   } while (J->state > LJ_TRACE_RECORD);

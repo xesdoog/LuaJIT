@@ -22,7 +22,6 @@
 #include "lj_lex.h"
 #include "lj_bcdump.h"
 #include "lj_parse.h"
-#include "lj_fopen.h"
 
 /* -- Load Lua source code and bytecode ----------------------------------- */
 
@@ -105,7 +104,7 @@ LUALIB_API int luaL_loadfilex(lua_State *L, const char *filename,
   int err = 0;
   if (filename) {
     chunkname = lua_pushfstring(L, "@%s", filename);
-    ctx.fp = _lua_fopen(filename, "rb");
+    ctx.fp = fopen(filename, "rb");
     if (ctx.fp == NULL) {
       L->top--;
       lua_pushfstring(L, "cannot open %s: %s", filename, strerror(errno));
