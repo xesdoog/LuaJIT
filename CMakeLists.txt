@@ -10,12 +10,7 @@ set(LUAJIT_TOP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 project(luajit)
 
 set(can_use_assembler TRUE)
-
-if (MSVC)
-    enable_language(ASM_MASM)
-else()
-    enable_language(ASM)
-endif()
+enable_language(ASM)
 
 include (GNUInstallDirs)
 
